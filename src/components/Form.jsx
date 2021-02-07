@@ -1,178 +1,117 @@
-import React, { Component } from 'react';
-import Button from './Button';
-import Todo from './Todo';
+import  React, { useState, useEffect, useRef } from 'react';
+import TodoCreator from "./FormInput";
+import TodoList from "./TodoList";
 
-const uuidv1 = require('uuid/v1');
+const Form = () => {
 
-let existingtodos;
-
-export default class Form extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-            todos: [],
-            submitted: false,
-            value: ''
+    const [ newTodo, setNewTodo ] = useState('');
+    const [ todos, setTodos ] = useState([
+        {
+            text: "todo about React List",
+            isCompleted: true,
+            isEditing: false
+        },
+        {
+            text: "Meet friend for lunch",
+            isCompleted: false,
+            isEditing: false
+        },
+        {
+            text: "Build really cool todo app",
+            isCompleted: false,
+            isEditing: false
         }
-    }
+    ]);
+    const inputRef = useRef();
+    const noteRef = useRef({});
+    const [ isInputEmpty, setInputEmpty ] = useState(false)
 
-    componentDidMount(){
-       // Check Local Storage for Data on Page Reload or use empty array.
-        existingtodos = JSON.parse(localStorage.getItem('todos')) || [];
 
-        // CHECK IF THERE IS ANYTHING IN LOCAL STORAGE!!! ====
-        if(localStorage.getItem('todos') !== null){
+    const handleSubmit = e => {
+        e.preventDefault();
+        addTodo(newTodo);
+        clearInput();
+        inputRef.current.focus();
+    };
 
-            // setting state at beginning if there is anything in local storage.
-            this.setState({todos: existingtodos});
+    const preventSubmit = e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
         }
-    }
+    };
 
-    // EDIT ITEM =====
-    editToDo = (id) => {
-        const todo = this.state.todos.filter((todo)=> {
-            if(todo.id === id){
-                // toggle from false/true
-                todo.edit = !todo.edit;
-            }
-            return todo;
-        })
-        this.setState({todos: todo}); 
-    }
-
-      // DONE ITEM ====
-    completeToDo = id => {
-       
-        const todo = this.state.todos.filter((todo)=> {
-            if(todo.id === id){
-                todo.complete = !todo.complete;
-            }
-            return todo;
-        })
-        this.setState({todos: todo});
-
-        // updating localStorage
-        this.addLocalStorage(todo);
-    }
-
-    updateItem = (data) => {
-       
-        const {item, id } = data;
-    
-        const newtodo = this.state.todos.map((todo)=> {
-            if(todo.id === id){
-               todo.item = item;
-               todo.edit = !todo.edit;
-            }
-            return todo;
-        })
-        this.setState({todos: newtodo});
-
-         // updating localStorage
-        this.addLocalStorage(newtodo);
-    }
-
-    // DELETE ITEM =====
-    removeToDo = (id) => {
-        
-        //filter through the todos and remove the one passed into the function...
-        const updatedtodos = this.state.todos.filter((todo, i) => id !== todo.id)
-        // //set new updated todo with the removed one gone.
-        this.setState({todos: updatedtodos});
-    }
-    
-    //Add to local storage function
-    addLocalStorage = (arr) => {
-        localStorage.setItem('todos', JSON.stringify(arr));
-    }
-
-    // DELETES EVERYTHING IN STATE AND LOCALSTORAGE ===
-    removeAll = () => {
-        this.setState({
-            todos: [],
-            submitted: false,
-        })
-        localStorage.clear();
-    }
-
-    handleChange = (e) => {
-        
-        this.setState({value: e.target.value})
-      }
-    // CREATE ITEM =====
-    handleSubmit = (e) => {
-        this.setState({submitted: true});
-        e.preventDefault()
-
-        let data = {
-            item: this.state.value,
-            complete: false,
-            edit: false,
-            id: uuidv1()
+    const addTodo = text => {
+        if ( text !== '') {
+            const newTodos = [...todos, { text }]
+            setNewTodo('')
+            setTodos(newTodos);
+        } else {
+            console.log('text', text)
+            setInputEmpty(true);
         }
+    };
 
-        this.setState({
-            // spread operator adds new object to exsitiing array.
-            todos: [
-                    ...this.state.todos,
-                    data
-            ]
-        });
-
-        existingtodos.push(data);
-        //Add to local storage function
-        this.addLocalStorage(existingtodos);
-        
-        this.setState({value: ""})
+    const removeTodo = inx => {
+        const newArr = [...todos]
+        newArr.splice(inx, 1)
+        setTodos(newArr)
     }
 
+    const completeTodo = inx => {
+        const newTodos = [...todos];
+        newTodos[inx].isCompleted = !newTodos[inx].isCompleted;
+        setTodos(newTodos);
+    };
 
-  render() {
+    const editTodo = inx => {
+        const newTodos = [...todos];
+        newTodos[inx].isEditing = !newTodos[inx].isEditing;
+        setTodos(newTodos);
+    }
+
+    const saveTodo = (inx) => {
+        const newTodos = [...todos];
+        newTodos[inx].isEditing = !newTodos[inx].isEditing;
+        newTodos[inx].text = noteRef.current[inx].value;
+        setTodos(newTodos);
+    }
+
+    const clearInput = () => {
+        setNewTodo('');
+    }
+
+    const setTodo = todo => {
+        setInputEmpty(false);
+        setNewTodo(todo);
+    }
+
+    useEffect(() => {
+
+    }, [todos])
+
     return (
-      <div>
-          <form className="addtodo" onSubmit={this.handleSubmit}>
-            <div className="formgroup">
-                <input
-                    type="text"
-                    placeholder="Enter task..."
-                    value={this.state.value}
-                    required
-                    onChange={this.handleChange}
-                    />
-            </div>
-            <input type="submit" className="btn" value="Add Todo +"/>
-            </form>
+        <form onSubmit={handleSubmit} className="form">
 
-            
-            {/* ===== TODO LIST ====== */}
-            <div id="to-do-list">
-                <h2 style={{color: "white"}}>Your Todos</h2>
-                
-                {this.state.todos.length === 0 ? <p>List is empty try adding a todo</p> : 
-                <React.Fragment>
-                <ul>{ this.state.todos.map((todo, i) => (
-                    
-                    // creating a todo Component for each new item, passing all functions
-                    <Todo
-                        key={todo.id}
-                        completeToDo={this.completeToDo}
-                        updateItem={this.updateItem}
-                        editToDo={this.editToDo}
-                        removeToDo={this.removeToDo}
-                        todoObject={todo}
-                    />
-                    ))
-                
-                }
-                </ul>
-                <div className="clearAll">
-                    <Button name="Clear All Todos" func={this.removeAll} nameClass="clear" />
-                </div>
-                </React.Fragment>
-                }
-                
-            </div>
-      </div>
+                <TodoCreator
+                    todo={newTodo}
+                    setTodo={setTodo}
+                    clearInput={clearInput}
+                    inputRef={inputRef}
+                    isInputEmpty={isInputEmpty}
+                    preventSubmit={preventSubmit}
+                />
+
+                <TodoList
+                    todos={todos}
+                    completeTodo={completeTodo}
+                    editTodo={editTodo}
+                    deleteTodo={removeTodo}
+                    saveTodo={saveTodo}
+                    noteRef={noteRef}
+                    preventSubmit={preventSubmit}
+                />
+            </form>
     )
-  }
 }
+
+export default Form;
