@@ -19,7 +19,7 @@ const TodoCreator = ({ todo, setTodo, clearInput, inputRef, isInputEmpty, preven
     return (
         <div className="form__input">
                 <FormControl   className={classes.label} noValidate autoComplete="off">
-                    <TextField required 
+                    <TextField 
                         className="TextField"
                         id="outlined-basic"
                         label="What's need to be done?" // better accessibility with Material UI

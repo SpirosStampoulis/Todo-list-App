@@ -46,7 +46,7 @@ const TodoList = ({ todos, completeTodo, editTodo, deleteTodo, saveTodo, noteRef
     return (
             <List className={classes.root}>
             {todos.map((todo, inx) => {
-                const labelId = `list-todo-${todo}`;
+                const labelId = `list-todo-${UniqKey++}`;
 
                 return (
                     <ListItem
