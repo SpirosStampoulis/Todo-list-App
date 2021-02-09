@@ -89,7 +89,7 @@ const TodoList = ({ todos, completeTodo, editTodo, deleteTodo, saveTodo, noteRef
                                 :
                                 <>
                                     <label
-                                        htmlFor="task" // better accessibility with HTML
+                                        htmlFor="task" 
                                         className="visuallyhidden"
                                     >
                                         {todo.text}

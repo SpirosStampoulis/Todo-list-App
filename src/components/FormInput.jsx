@@ -22,7 +22,7 @@ const TodoCreator = ({ todo, setTodo, clearInput, inputRef, isInputEmpty, preven
                     <TextField 
                         className="TextField"
                         id="outlined-basic"
-                        label="What's need to be done?" // better accessibility with Material  UI
+                        label="What's need to be done?"
                         value={todo}
                         variant="outlined"
                         onChange={(e) => setTodo(e.target.value)}
